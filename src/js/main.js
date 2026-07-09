@@ -93,10 +93,25 @@ class Events{
     }
     async bringEvents(cityName, countryCode) {
     this.eventsContent.innerHTML = `<p>Loading events...</p>`;
-    let response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?apikey=10DZtUm87ZpB1ZUuRhvHsbfbtomQHEbY&city=${cityName}&countryCode=${countryCode}&size=20`);
-    this.data = await response.json();
-    this.render();
-    this.addEvents();
+    const loading = document.getElementById("loading-overlay");
+
+    loading.classList.remove("hidden");
+
+    try {
+        const response = await fetch(
+            `https://app.ticketmaster.com/discovery/v2/events.json?apikey=10DZtUm87ZpB1ZUuRhvHsbfbtomQHEbY&city=${cityName}&countryCode=${countryCode}&size=20`
+        );
+
+        this.data = await response.json();
+
+        this.render();
+        this.addEvents();
+    } catch (error) {
+        this.eventsContent.innerHTML = `<p>Failed to load events.</p>`;
+        console.error(error);
+    } finally {
+        loading.classList.add("hidden");
+    }
 }
 render(){
     let container = "";
@@ -664,6 +679,7 @@ class CountryInfo {
     }
     async showCountry(countryCode) {
         this.section.innerHTML = `<p>Loading country info...</p>`;
+        document.getElementById("loading-overlay").classList.remove("hidden");
         await this.loadAllCountries();
 
         const country = this.countriesMap.get(countryCode.toUpperCase());
